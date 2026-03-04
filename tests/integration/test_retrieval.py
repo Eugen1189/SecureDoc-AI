@@ -38,7 +38,7 @@ async def test_generate_answer_success():
                 # Execute
                 result = await generate_answer("What does dental care cover?")
                 
-                assert result["status"] == "success" or "answer" in result
+                assert "answer" in result
                 assert "dental care up to 500 EUR" in result["answer"]
                 assert result["sources"][0]["file"] == "policy.pdf"
 
