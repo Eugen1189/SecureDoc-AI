@@ -1,0 +1,15 @@
+# SecureDoc-AI Project Rules
+
+## Python & Development
+- **Pydantic**: Always use Pydantic v2.
+- **Async**: Prefer async/await for API routes and external service calls (Qdrant, OpenAI).
+- **Logging**: Use `structlog` for structured logging.
+
+## AI & RAG
+- **Citations**: Citations are mandatory in LLM responses. Any answer generated from documents must include references to the source material.
+- **GDPR Compliance**: Ensure GDPR compliance by isolating user data in vector metadata. Use specific metadata fields for user/org IDs to enable strict filtering.
+- **PII Masking**: All documents must pass through PII masking before embedding/storage if sensitive info is detected.
+
+## Architecture
+- Follow the modular RAG architecture (Ingestion vs Retrieval).
+- Keep `src/core/logic/` for orchestration and `src/services/` for direct external integrations.

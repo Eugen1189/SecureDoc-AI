@@ -1,0 +1,28 @@
+[project]
+name = "securedoc-ai"
+version = "0.1.0"
+description = "Enterprise RAG system with PII masking and document security"
+authors = [
+    {name = "SecureDoc-AI Team"}
+]
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn>=0.27.0",
+    "langchain-openai>=0.1.0",
+    "langchain-community>=0.0.30",
+    "qdrant-client>=1.8.0",
+    "pypdf>=4.1.0",
+    "pydantic-settings>=2.2.0",
+    "structlog>=24.1.0",
+    "pydantic>=2.6.0"
+]
+readme = "README.md"
+requires-python = ">=3.11"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
