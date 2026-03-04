@@ -20,5 +20,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -e .
     - name: Run tests
+      env:
+        OPENAI_API_KEY: "mock-key-for-testing"
       run: |
         pytest

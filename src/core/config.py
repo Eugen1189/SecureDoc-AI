@@ -1,7 +1,8 @@
+from typing import Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    OPENAI_API_KEY: str
+    OPENAI_API_KEY: Optional[str] = None
     QDRANT_URL: str = "http://qdrant:6333"
     COLLECTION_NAME: str = "securedoc_collection"
 
