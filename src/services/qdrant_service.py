@@ -1,4 +1,5 @@
 import structlog
+import uuid
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
 from langchain_openai import OpenAIEmbeddings
@@ -44,14 +45,18 @@ class VectorStoreService:
 
         try:
             texts = [doc.page_content for doc in documents]
-            metadatas = [doc.metadata for doc in documents]
+            metadatas = []
+            for doc in documents:
+                meta = doc.metadata.copy()
+                meta["page_content"] = doc.page_content
+                metadatas.append(meta)
             
             logger.info("generating_embeddings", count=len(texts))
             embeddings = self.embeddings.embed_documents(texts)
             
             points = [
                 models.PointStruct(
-                    id=doc.metadata.get("chunk_id", i), # fallback to index if no chunk_id
+                    id=doc.metadata.get("chunk_id", str(uuid.uuid4())), 
                     vector=embeddings[i],
                     payload=metadatas[i]
                 )
@@ -66,6 +71,39 @@ class VectorStoreService:
         except Exception as e:
             logger.error("upsert_failed", error=str(e))
             raise ConnectionError(f"Failed to upsert to Qdrant: {e}")
+
+    def query_similar_chunks(self, query: str, top_k: int = 4) -> list[Document]:
+        """
+        Generates embedding for the query and performs a search in Qdrant.
+        Returns a list of Document objects with metadata.
+        """
+        try:
+            logger.info("querying_qdrant", query=query, top_k=top_k)
+            query_vector = self.embeddings.embed_query(query)
             
+            search_result = self.client.search(
+                collection_name=self.collection_name,
+                query_vector=query_vector,
+                limit=top_k,
+                with_payload=True
+            )
+            
+            documents = [
+                Document(
+                    page_content=res.payload.get("page_content", ""), # We should have stored page_content in payload
+                    metadata=res.payload
+                )
+                for res in search_result
+            ]
+            
+            # If page_content was not explicitly in payload (LangChain style usually puts it there), 
+            # we need to make sure we store it during upsert. 
+            # Let's adjust upsert to include text in payload.
+            
+            return documents
+        except Exception as e:
+            logger.error("query_failed", error=str(e))
+            raise
+
     def close(self):
         self.client.close()
